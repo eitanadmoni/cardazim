@@ -2,6 +2,7 @@ import argparse
 import sys
 import socket
 import struct
+from connection import Connection
 
 
 ###########################################################
@@ -13,14 +14,11 @@ def send_data(server_ip, server_port, data):
     '''
     Send data to server in address (server_ip, server_port).
     '''
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((server_ip, server_port))
-    data_bytes = data.encode('utf-8')
-    n = len(data_bytes)
-    format = f'<I{n}s'
-    data = struct.pack(format, n, data_bytes)
-    s.sendall(data)
-    s.close()
+    with Connection.connect(server_ip, server_port) as connection:
+        data_bytes = data.encode('utf-8')
+        connection.send_message(data_bytes)
+
+
 ###########################################################
 ##################### END OF YOUR CODE ####################
 ###########################################################

@@ -1,45 +1,18 @@
 import argparse
 import sys
-import socket
-import functools
 import threading
+from listener import Listener
 
 
-def recv_from_client(conn):
-    """
-    Receive data from client and print it
-    :param conn: socket to connect wih client
-    """
-    data = conn.recv(4)
-    length = int.from_bytes(data, "little")
-    buff = []
-    while True:
-        data = conn.recv(1024)
-        buff += data.decode('utf-8')
-        if not data:
-            break
-    message = functools.reduce(lambda x, y: x+y, buff)
-    print("Received data: " + message)
-    conn.close()
-
+def client_handler(connection):
+    connection.receive_message()
+    connection.close()
 
 def run_server(ip, port):
-    """
-    listen for connections and give each cliend a thread
-    :param ip: ip of server
-    :param port: port to listen at
-    """
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((ip, port))
-        s.listen()
+    with Listener(ip, port) as listener:
         while True:
-            conn, addr = s.accept()
-            threading.Thread(target=recv_from_client, args=(conn,)).start()
-            recv_from_client(s.accept()[0])
-
-
-
-
+            connection = listener.accept()
+            threading.Thread(target=connection.receive_message).start()
 
 
 def get_args():
