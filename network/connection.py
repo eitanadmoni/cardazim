@@ -2,6 +2,9 @@ import socket
 import functools
 import struct
 
+KB = 1024
+METADATA_LENGTH = 4
+
 
 class Connection:
     def __init__(self, connection: socket.socket):
@@ -19,19 +22,16 @@ class Connection:
         self.conn.sendall(data)
 
     def receive_message(self):
-        data = self.conn.recv(4)
-        length = int.from_bytes(data, "little")
-        buff = []
+        message_length = int.from_bytes(self.conn.recv(METADATA_LENGTH), "little")
+        message_from_client = b''
         while True:
-            data = self.conn.recv(1024)
-            buff += data.decode('utf-8')
+            data = self.conn.recv(KB)
             if not data:
                 break
-            length -= len(data)
-        if length != 0:
+            message_from_client += data
+        if message_length != len(message_from_client):
             raise Exception("Connection close before all message arrive")
-        message = functools.reduce(lambda x, y: x + y, buff)
-        print("Received data: " + message)
+        return message_from_client
 
     @classmethod
     def connect(cls, host, port):

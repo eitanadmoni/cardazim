@@ -2,17 +2,22 @@ import argparse
 import sys
 import threading
 from listener import Listener
+from crypt_image import CryptImage
+from card import Card
 
 
 def client_handler(connection):
-    connection.receive_message()
+    serialized_card = connection.receive_message()
     connection.close()
+    deserialized_card = Card.deserialize(serialized_card)
+    print(f"Received card {deserialized_card.name} by {deserialized_card.creator}")
+
 
 def run_server(ip, port):
     with Listener(ip, port) as listener:
         while True:
             connection = listener.accept()
-            threading.Thread(target=connection.receive_message).start()
+            threading.Thread(target=client_handler, args=(connection,)).start()
 
 
 def get_args():
