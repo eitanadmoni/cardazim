@@ -1,8 +1,11 @@
+
 import argparse
 import sys
 import socket
 import struct
 from connection import Connection
+from crypt_image import CryptImage
+from card import Card
 
 
 ###########################################################
@@ -10,13 +13,16 @@ from connection import Connection
 ###########################################################
 
 
-def send_data(server_ip, server_port, data):
+def send_data(server_ip, server_port, name, creator, riddle, solution, path):
     '''
     Send data to server in address (server_ip, server_port).
     '''
     with Connection.connect(server_ip, server_port) as connection:
-        data_bytes = data.encode('utf-8')
-        connection.send_message(data_bytes)
+        card = Card.create_from_path(name, creator, path, riddle, solution)
+        card.image.encrypt(solution)
+        serialized_card = card.serialize()
+        print(f"Sending card {card.name} by {card.creator}...")
+        connection.send_message(serialized_card)
 
 
 ###########################################################
@@ -30,7 +36,15 @@ def get_args():
                         help='the server\'s ip')
     parser.add_argument('server_port', type=int,
                         help='the server\'s port')
-    parser.add_argument('data', type=str,
+    parser.add_argument('name', type=str,
+                        help='the data')
+    parser.add_argument('creator', type=str,
+                        help='the data')
+    parser.add_argument('riddle', type=str,
+                        help='the data')
+    parser.add_argument('solution', type=str,
+                        help='the data')
+    parser.add_argument('path', type=str,
                         help='the data')
     return parser.parse_args()
 
@@ -41,7 +55,7 @@ def main():
     '''
     args = get_args()
     try:
-        send_data(args.server_ip, args.server_port, args.data)
+        send_data(args.server_ip, args.server_port, args.name, args.creator, args.riddle, args.solution, args.path)
         print('Done.')
     except Exception as error:
         print(f'ERROR: {error}')
@@ -50,3 +64,4 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
+
