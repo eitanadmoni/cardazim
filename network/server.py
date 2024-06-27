@@ -4,17 +4,16 @@ import threading
 from listener import Listener
 from crypt_image import CryptImage
 from card import Card
-from card_manager import CardManager
+from saver import Saver
 
 
-def client_handler(connection, dir_path):
+def client_handler(connection, driver_path):
     serialized_card = connection.receive_message()
     connection.close()
     deserialized_card = Card.deserialize(serialized_card)
-
     print(f"Received card.")
-    card_manager = CardManager()
-    card_manager.save(deserialized_card, dir_path + "/unsolved_cards")
+    card_manager = Saver(driver_path)
+    card_manager.save(deserialized_card)
     print(f"Saved card to path ./data/unsolved_cards/{card_manager.get_identifier(deserialized_card)}")
 
 

@@ -28,7 +28,6 @@ class Card:
         return cls(name, creator, image, riddle, solution)
 
     def serialize(self) -> bytes:
-        print(self.image.image.mode)
         name_length = len(self.name.encode('utf-8'))
         creator_length = len(self.creator.encode('utf-8'))
         riddle_length = len(self.riddle.encode('utf-8'))

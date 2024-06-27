@@ -19,6 +19,7 @@ class Saver:
         image.save(image_path, "JPEG")
         metadata['image_path'] = image_path
         metadata['identifier'] = self.get_identifier(card)
+        print(metadata)
         self.driver.save_card(metadata)
 
     def get_identifier(self, card):
