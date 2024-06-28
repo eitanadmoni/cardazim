@@ -73,8 +73,6 @@ class FilesystemDriver(CardDriver):
 class SQLDriver(CardDriver):
     def __init__(self, db_path):
         self.db_path = db_path
-    
-    def save_card(self, metadata):
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
         cur.execute('''
@@ -85,14 +83,26 @@ class SQLDriver(CardDriver):
                 creator TEXT NOT NULL,
                 riddle TEXT,
                 solution TEXT,
-                image_path TEXT
+                image_path TEXT,
+                key_hash BLOB
             )
         ''')
-        cur.execute('''
-            INSERT INTO cards (identifier, name, creator, riddle, solution, image_path)
-            VALUES (:identifier, :name, :creator, :riddle, :solution, :image_path)
-        ''', metadata)
+        conn.close()
+    
+    def save_card(self, metadata):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM cards WHERE identifier = ?', (metadata['identifier'],))
+        row = cur.fetchone()
+        if row is None:
+            cur.execute('''
+                INSERT INTO cards (identifier, name, creator, riddle, solution, image_path, key_hash)
+                VALUES (:identifier, :name, :creator, :riddle, :solution, :image_path, :key_hash)
+            ''', metadata)
 
+        else:
+            cur.execute('UPDATE cards SET solution = ? WHERE identifier = ?', (metadata['solution'], metadata['identifier']))
+        
         conn.commit()
         conn.close()
 
@@ -108,7 +118,7 @@ class SQLDriver(CardDriver):
         rows = cur.fetchall()
         for row in rows:
             conn.close()
-            return row_to_dict(row)
+            return self,row_to_dict(row)
             
     
     def get_creators(self):
@@ -126,16 +136,17 @@ class SQLDriver(CardDriver):
         cur = conn.cursor()
         cur.execute('SELECT * FROM cards WHERE creator = ?', (creator,))
         rows = cur.fetchall()
-        creator_cards_medata = [row_to_dict(row) for row in rows]
+        creator_cards_medata = [self.row_to_dict(row) for row in rows]
         conn.close()
         return creator_cards_medata
 
-def row_to_dict(row):
-    return {
-        'identifier': row[1],
-        'name': row[2],
-        'creator': row[3],
-        'riddle': row[4],
-        'solution': row[5],
-        'image_path': row[6]
-    }
+    def row_to_dict(self, row):
+        return {
+            'identifier': row[1],
+            'name': row[2],
+            'creator': row[3],
+            'riddle': row[4],
+            'solution': row[5],
+            'image_path': row[6],
+            'key_hash': row[7]
+        }
