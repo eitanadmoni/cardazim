@@ -118,7 +118,7 @@ class SQLDriver(CardDriver):
         rows = cur.fetchall()
         for row in rows:
             conn.close()
-            return self,row_to_dict(row)
+            return self.row_to_dict(row)
             
     
     def get_creators(self):
@@ -139,6 +139,30 @@ class SQLDriver(CardDriver):
         creator_cards_medata = [self.row_to_dict(row) for row in rows]
         conn.close()
         return creator_cards_medata
+    
+    def find_by_parameters(self, name, creator, riddle):
+        cards = []
+        parameters = []
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        query = 'SELECT * FROM cards WHERE 1=1'
+        if creator:
+            query += ' AND creator = ?'
+            parameters.append(creator)
+        if name:
+            query += ' AND name = ?'
+            parameters.append(name)
+        if riddle:
+            query += ' AND riddle = ?'
+            parameters.append(riddle)
+        cur.execute(query, parameters)
+        rows = cur.fetchall()
+        for row in rows:
+            card_data = self.row_to_dict(row)
+            card_data.pop('key_hash')
+            cards.append(card_data)
+        conn.close()
+        return cards
 
     def row_to_dict(self, row):
         return {

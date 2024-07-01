@@ -11,10 +11,10 @@ def client_handler(connection, driver_path):
     serialized_card = connection.receive_message()
     connection.close()
     deserialized_card = Card.deserialize(serialized_card)
-    print(f"Received card.")
+    print(f"Received card {deserialized_card.name} by {deserialized_card.creator}.")
     card_manager = Saver(driver_path)
     card_manager.save(deserialized_card)
-    print(f"Saved card to path ./data/unsolved_cards/{card_manager.get_identifier(deserialized_card)}")
+    print("Saved card to database")
 
 
 def run_server(ip, port, directory_name):

@@ -45,6 +45,10 @@ class Saver:
         
         if parts[0] == "sql":
             return SQLDriver(parts[1])
+
+    
+    def find_by_parameters(self, name, creator, riddle):
+        return self.driver.find_by_parameters(name, creator, riddle)
             
 
 def parse_card(card):

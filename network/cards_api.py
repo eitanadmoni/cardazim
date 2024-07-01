@@ -12,7 +12,7 @@ def create_app(database_url):
 
     @app.route('/')       
     def hello(): 
-        return 'HELLO'
+        return 'Welcome to Cardazim'
 
     @app.route('/creators')
     def get_creators():
@@ -61,30 +61,10 @@ def create_app(database_url):
 
     @app.route('/cards/find')
     def find_by_parameters():
-        cards = []
-        parameters = []
         creator = request.args.get('creator')
         name = request.args.get('name')
         riddle = request.args.get('riddle')
-        conn = sqlite3.connect(app.db.driver.db_path)
-        cur = conn.cursor()
-        query = 'SELECT * FROM cards WHERE 1=1'
-        if creator:
-            query += ' AND creator = ?'
-            parameters.append(creator)
-        if name:
-            query += ' AND name = ?'
-            parameters.append(name)
-        if riddle:
-            query += ' AND riddle = ?'
-            parameters.append(riddle)
-        cur.execute(query, parameters)
-        rows = cur.fetchall()
-        for row in rows:
-            card_data = app.db.driver.row_to_dict(row)
-            card_data.pop('key_hash')
-            cards.append(card_data)
-        conn.close()
+        cards = app.db.find_by_parameters(name, creator, riddle)
         return jsonify(cards)        
 
 
