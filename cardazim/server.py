@@ -8,6 +8,7 @@ def run_server(ip, port):
     try:
         # Create a socket object
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.settimeout(5)
         
         # Bind the server to the provided IP and port
         server_socket.bind((ip, port))
