@@ -19,7 +19,6 @@ def run_server(ip, port):
         while True:
             # Accept a client connection
             client_socket, client_address = server_socket.accept()
-            print(f"Connection from {client_address}")
             
             # Receive the data sent by the client
             data = client_socket.recv(1024)
