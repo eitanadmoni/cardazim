@@ -57,7 +57,7 @@ def main() -> None:
 
 
     try:
-        run_listener_server(args.server_ip, args.server_port)
+        run_server(args.server_ip, args.server_port)
         print('Done.')
     except Exception as error:
         print(f'ERROR: {error}')
