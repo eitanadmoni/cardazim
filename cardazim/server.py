@@ -7,9 +7,7 @@ def run_server(ip, port):
     """Function to run the server, receive data from clients, and print it."""
     try:
         # Create a socket object
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.settimeout(5)
-        
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)        
         # Bind the server to the provided IP and port
         server_socket.bind((ip, port))
     
