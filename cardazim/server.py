@@ -25,6 +25,7 @@ def run_server(ip, port):
             
             if data:
                 # Decode and print the received data
+                data = data[4:]
                 print(f"Received data: {data.decode('utf-8')}")
 
     except Exception as e:
