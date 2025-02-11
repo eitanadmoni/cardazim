@@ -1,67 +1,35 @@
 import socket
-import argparse
-import sys
-from utils import unpack_message
 
-BACKLOG_SIZE = 1
-RECV_BUFSIZE = 4096
-
-def read_all_data(socket: socket.socket) -> str:
-    """
-    Reads the message from the socket and then CLOSES it.
-    
-    :param socket: The socket from which the data is read.
-    :type socket.socket:
-    :returns: The data as an 'utf-8' string.
-    :rtype: str
-    """
-    from_client = b''
-    
-    with socket:
+def run_server(ip, port):
+    """Function to run the server, receive data from clients, and print it."""
+    try:
+        # Create a socket object
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        # Bind the server to the provided IP and port
+        server_socket.bind((ip, port))
+        print(f"Server started at {ip}:{port}")
+        
+        # Listen for incoming connections
+        server_socket.listen(5)
+        
         while True:
-            if not (data := socket.recv(RECV_BUFSIZE)):
-                break
+            # Accept a client connection
+            client_socket, client_address = server_socket.accept()
+            print(f"Connection from {client_address}")
+            
+            # Receive the data sent by the client
+            data = client_socket.recv(1024)
+            
+            if data:
+                # Decode and print the received data
+                print(f"Received data: {data.decode('utf-8')}")
 
-            from_client += data
-
-    return unpack_message(from_client)
-
-
-def init_server_socket(server_ip: str, server_port: int) -> None:
-    """
-    Creates and initializes a socket for the server.
-
-    :param server_ip: 
-    :type str:
-    :param server_port:
-    :type int:
-    """
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind((server_ip, server_port))
-    server_socket.listen(BACKLOG_SIZE) # This is how many queued connections do we support.
-
-    return server_socket
-
-def run_listener_server(server_ip: str, server_port: int) -> None:
-    """
-    Opens a server on 'server_ip' at port 'server_port'.
-    The server opens a listening thread for each connection
-    and prints to the screen every message that it recieves.
-    
-    :param server_ip: 
-    :type str:
-    :param server_port:
-    :type int:
-    """
-    with init_server_socket(server_ip, server_port) as server_socket:
-
-        while True:
-            client_socket, client_addr = server_socket.accept()
-
-            from_client = read_all_data(client_socket)
-            print (f'Received message: {from_client}')
-
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        # Ensure the server socket is closed properly
+        server_socket.close()
 
 def get_args() -> argparse.Namespace:
     """
