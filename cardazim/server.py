@@ -11,8 +11,7 @@ def run_server(ip, port):
         
         # Bind the server to the provided IP and port
         server_socket.bind((ip, port))
-        print(f"Server started at {ip}:{port}")
-        
+    
         # Listen for incoming connections
         server_socket.listen(5)
         
