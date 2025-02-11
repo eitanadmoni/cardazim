@@ -1,4 +1,7 @@
+import argparse
+import sys
 import socket
+import struct
 
 def run_server(ip, port):
     """Function to run the server, receive data from clients, and print it."""
